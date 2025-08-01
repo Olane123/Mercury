@@ -1,10 +1,13 @@
 // Import the functions you need from the SDKs you need
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { initializeApp } from "firebase/app";
 
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+import { getAnalytics } from "firebase/analytics";
 
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+// TODO: Add SDKs for Firebase products that you want to use
+
+// https://firebase.google.com/docs/web/setup#available-libraries
+
 
 // Your web app's Firebase configuration
 
@@ -12,19 +15,19 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
+  apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
 
-    authDomain: "mercury-messanger.firebaseapp.com",
+  authDomain: "mercury-messanger.firebaseapp.com",
 
-    projectId: "mercury-messanger",
+  projectId: "mercury-messanger",
 
-    storageBucket: "mercury-messanger.firebasestorage.app",
+  storageBucket: "mercury-messanger.firebasestorage.app",
 
-    messagingSenderId: "505117536743",
+  messagingSenderId: "505117536743",
 
-    appId: "1:505117536743:web:9426c1fc6da3fabdf18d42",
+  appId: "1:505117536743:web:9426c1fc6da3fabdf18d42",
 
-    measurementId: "G-S20ESYTBCS"
+  measurementId: "G-S20ESYTBCS"
 
 };
 
@@ -56,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loginTab.classList.remove('active');
         registerForm.classList.add('active');
         loginForm.classList.remove('active');
-        print("!!!");
     });
 
     // Валидация форм
