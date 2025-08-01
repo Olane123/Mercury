@@ -1,42 +1,44 @@
-// Import the functions you need from the SDKs you need
 
-import { initializeApp } from "firebase/app";
+  // Import the functions you need from the SDKs you need
 
-import { getAnalytics } from "firebase/analytics";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-// TODO: Add SDKs for Firebase products that you want to use
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
 
-// https://firebase.google.com/docs/web/setup#available-libraries
+  // TODO: Add SDKs for Firebase products that you want to use
 
-
-// Your web app's Firebase configuration
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
-
-  authDomain: "mercury-messanger.firebaseapp.com",
-
-  projectId: "mercury-messanger",
-
-  storageBucket: "mercury-messanger.firebasestorage.app",
-
-  messagingSenderId: "505117536743",
-
-  appId: "1:505117536743:web:9426c1fc6da3fabdf18d42",
-
-  measurementId: "G-S20ESYTBCS"
-
-};
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
 
-// Initialize Firebase
+  // Your web app's Firebase configuration
 
-const app = initializeApp(firebaseConfig);
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
-const analytics = getAnalytics(app);
+  const firebaseConfig = {
+
+    apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
+
+    authDomain: "mercury-messanger.firebaseapp.com",
+
+    projectId: "mercury-messanger",
+
+    storageBucket: "mercury-messanger.firebasestorage.app",
+
+    messagingSenderId: "505117536743",
+
+    appId: "1:505117536743:web:9426c1fc6da3fabdf18d42",
+
+    measurementId: "G-S20ESYTBCS"
+
+  };
+
+
+  // Initialize Firebase
+
+  const app = initializeApp(firebaseConfig);
+
+  const analytics = getAnalytics(app);
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const loginTab = document.getElementById('login-tab');
