@@ -80,11 +80,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const auth = getAuth()
         const registerEmail = document.getElementById('register-email').value;
         const registerPassword = document.getElementById('register-password').value;
-
-        createUserWithEmailAndPassword(auth, registerEmail, registerPassword)
+        const passwordConfirm = document.getElementById("register-confirm").value
+        if (registerPassword == passwordConfirm)
+        {
+            createUserWithEmailAndPassword(auth, registerEmail, registerPassword)
             .then((userCredential) => {
                 // Signed up
                 const user = userCredential.user;
+                alert('Регистрация успешна!');
                 // ...
             })
             .catch((error) => {
@@ -93,8 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Регистрация неуспешна!');
                 // ..
             });
-
-        // Здесь можно добавить логику регистрации
-        alert('Регистрация успешна!');
+        }
+        else
+        {
+            alert("Пароли не совпадают!");
+        }
         });
     });
