@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then((userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
+                alert('Авторизация успешна!');
+                alert("Переход!");
                 // ...
             })
             .catch((error) => {
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
         // Здесь можно добавить логику регистрации
-        alert('Авторизация успешна!');
+        
         });
 
     registerForm.addEventListener('submit', function(e) {
