@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const user = userCredential.user;
                 alert('Авторизация успешна!');
                 alert("Переход!");
+                window.location.href = "MainMessanger.html"
                 // ...
             })
             .catch((error) => {
