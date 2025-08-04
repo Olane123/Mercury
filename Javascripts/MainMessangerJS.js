@@ -1,4 +1,34 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
+    authDomain: "mercury-messanger.firebaseapp.com",
+    projectId: "mercury-messanger",
+    storageBucket: "mercury-messanger.firebasestorage.app",
+    messagingSenderId: "505117536743",
+    appId: "1:505117536743:web:9426c1fc6da3fabdf18d42",
+    measurementId: "G-S20ESYTBCS"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Проверка аутентификации при загрузке
 document.addEventListener('DOMContentLoaded', function() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Пользователь не авторизован, перенаправляем на страницу входа
+            window.location.href = "index.html";
+        } else {
+            // Пользователь авторизован, загружаем интерфейс мессенджера
+            loadMessengerUI(user);
+        }
+    });
+});
+
+function loadMessengerUI() {}
     // Статистика пользователя
     const userStats = {
         registrationDate: new Date(2024, 0, 1), // Дата регистрации (1 января 2024)
@@ -657,4 +687,3 @@ document.addEventListener('DOMContentLoaded', function() {
             stickersPanel.classList.remove('active');
         }
     });
-});
