@@ -1,5 +1,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+    getFirestore,
+    collection,
+    doc,
+    setDoc,
+    getDoc,
+    query,
+    where,
+    getDocs,
+    onSnapshot,
+    addDoc,
+    updateDoc,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCH1tXQjHYx_jOW2ez_tSz0ZNrie-TzGLk",
@@ -13,20 +27,84 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Проверка аутентификации при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            // Пользователь не авторизован, перенаправляем на страницу входа
-            window.location.href = "index.html";
-        } else {
-            // Пользователь авторизован, загружаем интерфейс мессенджера
-            loadMessengerUI(user);
-        }
-    });
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        // Пользователь не авторизован, перенаправляем на страницу входа
+        window.location.href = "index.html";
+    } else {
+        initializeApp(db, user);
+        // Пользователь авторизован, загружаем интерфейс мессенджера
+        loadMessengerUI(user);
+    }
 });
+
+const userSearchInput = document.getElementById('user-search');
+const searchResults = document.getElementById('search-results');
+
+userSearchInput.addEventListener('input', async (e) => {
+    const username = e.target.value.trim();
+    searchResults.innerHTML = '';
+
+    if (username.length < 3) return;
+
+    const usersRef = collection(db, "users");
+    const q = query(
+        usersRef,
+        where("username", ">=", username),
+        where("username", "<=", username + '\uf8ff'),
+        limit(5)
+    );
+
+    try {
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+            if (doc.id !== auth.currentUser.uid) {
+                addUserToResults(doc.data(), doc.id);
+            }
+        });
+    } catch (error) {
+        console.error("Ошибка поиска: ", error);
+    }
+});
+
+function addUserToResults(user, userId) {
+    const userElement = document.createElement('div');
+    userElement.className = 'search-result-item';
+    userElement.innerHTML = `
+    <div class="user-avatar" style="background:${user.avatar || 'var(--accent)'}">
+      ${user.name ? user.name.charAt(0) : ''}
+    </div>
+    <div class="user-info">
+      <div class="user-name">${user.name || 'Без имени'}</div>
+      <div class="user-username">@${user.username}</div>
+    </div>
+    <button class="start-chat-btn" data-uid="${userId}">Чат</button>
+  `;
+    searchResults.appendChild(userElement);
+
+    // Обработчик старта чата
+    userElement.querySelector('.start-chat-btn').addEventListener('click', async () => {
+        await createPrivateChat(userId, user);
+        searchResults.innerHTML = '';
+        userSearchInput.value = '';
+    });
+}
+
+async function initUserProfile(user) {
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
+
+    if (!docSnap.exists()) {
+        await setDoc(userRef, {
+            name: user.displayName || "Новый пользователь",
+            username: user.email.split('@')[0],
+            createdAt: new Date()
+        });
+    }
+}
 
 function loadMessengerUI() {}
     // Статистика пользователя
@@ -239,104 +317,47 @@ function loadMessengerUI() {}
         }
     });
 
-    function sendMessage() {
-        const message = messageInput.value.trim();
+async function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
 
-        if (message) {
-            // Увеличиваем счетчик сообщений
-            userStats.sentMessages++;
-
-            // Обновляем активность
-            const today = new Date();
-            const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][today.getDay()];
-            userStats.activity[dayOfWeek] = Math.min(100, userStats.activity[dayOfWeek] + 5);
-
-            const messagesContainer = document.querySelector('.messages-container');
-            const typingIndicator = document.querySelector('.typing-indicator');
-
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message outgoing';
-            messageElement.innerHTML = `
-                        ${message}
-                        <div class="message-time">${getCurrentTime()}</div>
-                        
-                        <div class="message-reactions">
-                            <div class="add-reaction-btn">+</div>
-                        </div>
-                        
-                        <div class="reactions-panel">
-                            <div class="reaction-option">👍</div>
-                            <div class="reaction-option">👎</div>
-                            <div class="reaction-option">❤️</div>
-                            <div class="reaction-option">😂</div>
-                            <div class="reaction-option">😮</div>
-                            <div class="reaction-option">😢</div>
-                            <div class="reaction-option">👏</div>
-                        </div>
-                    `;
-
-            messagesContainer.appendChild(messageElement);
-            messageInput.value = '';
-
-            // Прокрутка к последнему сообщению
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Инициализация реакций для нового сообщения
-            initReactions(messageElement);
-
-            // Проверка на промокод
-            if (message.toLowerCase() === "milli") {
-                // Активация подарка
-                userStats.receivedGifts++;
-                showNotification('Промокод активирован! Вы получили ракету-подарок!', 'success');
-
-                // Анимация подарка
-                animateRocketGift();
-            }
-
-            // Имитация ответа
-            setTimeout(() => {
-                const typing = document.createElement('div');
-                typing.className = 'typing-indicator';
-                typing.innerHTML = '<span></span><span></span><span></span>';
-                messagesContainer.appendChild(typing);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                setTimeout(() => {
-                    typing.remove();
-                    const replyElement = document.createElement('div');
-                    replyElement.className = 'message incoming';
-                    replyElement.innerHTML = `
-                                Отличный вариант! Я как раз хотел предложить это кафе. Забронируем столик на 18:00?
-                                <div class="message-time">${getCurrentTime()}</div>
-                                
-                                <div class="message-reactions">
-                                    <div class="add-reaction-btn">+</div>
-                                </div>
-                                
-                                <div class="reactions-panel">
-                                    <div class="reaction-option">👍</div>
-                                    <div class="reaction-option">👎</div>
-                                    <div class="reaction-option">❤️</div>
-                                    <div class="reaction-option">😂</div>
-                                    <div class="reaction-option">😮</div>
-                                    <div class="reaction-option">😢</div>
-                                    <div class="reaction-option">👏</div>
-                                </div>
-                            `;
-                    messagesContainer.appendChild(replyElement);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                    // Инициализация реакций для ответа
-                    initReactions(replyElement);
-                }, 2000);
-            }, 1000);
-        }
+    const activeChat = document.querySelector('.chat-item.active');
+    if (!activeChat) {
+        showNotification('Выберите чат для отправки сообщения', 'error');
+        return;
     }
+
+    const chatId = activeChat.dataset.chatid;
+    const messagesRef = collection(db, `chats/${chatId}/messages`);
+
+    try {
+        // Добавляем новое сообщение в подколлекцию
+        await addDoc(messagesRef, {
+            senderId: auth.currentUser.uid,
+            text: message,
+            timestamp: new Date()
+        });
+
+        // Обновляем последнее сообщение в основном документе чата
+        await updateDoc(doc(db, "chats", chatId), {
+            lastMessage: {
+                text: message,
+                timestamp: new Date(),
+                senderId: auth.currentUser.uid
+            }
+        });
+
+        messageInput.value = '';
+
+        // Обновляем счетчик сообщений в статистике
+        userStats.sentMessages++;
+        updateStats();
+
+    } catch (error) {
+        console.error("Ошибка отправки сообщения:", error);
+        showNotification('Ошибка отправки сообщения', 'error');
+    }
+}
 
     // Анимация подарка-ракеты
     function animateRocketGift() {
