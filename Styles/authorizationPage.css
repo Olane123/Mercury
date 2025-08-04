@@ -13,6 +13,12 @@ body {
     align-items: center;
     color: #fff;
 }
+#logo{
+    
+    width: 100px;
+    height: 100px;
+    
+}
 
 .container {
     width: 100%;
@@ -45,6 +51,7 @@ body {
 .logo h1 {
     font-weight: 500;
     font-size: 28px;
+    margin-right: 50px;
 }
 
 .tabs {
